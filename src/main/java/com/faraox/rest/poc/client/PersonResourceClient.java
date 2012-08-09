@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.faraox.rest.poc.resource.client;
+package com.faraox.rest.poc.client;
 
 import com.faraox.rest.poc.bean.Person;
 import com.sun.jersey.api.client.Client;
