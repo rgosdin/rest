@@ -14,7 +14,10 @@ import com.sun.jersey.oauth.client.OAuthClientFilter;
 import com.sun.jersey.oauth.signature.OAuthParameters;
 import com.sun.jersey.oauth.signature.OAuthSecrets;
 import com.sun.jersey.oauth.signature.PLAINTEXT;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URI;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
@@ -25,6 +28,8 @@ import org.junit.*;
  * @author sshami
  */
 public class PersonResourceTest {
+    
+    private static String BASE_URI = "http://localhost:8084/rest";
 
     public PersonResourceTest() {
     }
@@ -47,17 +52,17 @@ public class PersonResourceTest {
 
     @Test
     public void get() {
-        
+
         WebResource service = getWebResource();
-        
+
         String response = service.path("person/1").
                 accept(MediaType.APPLICATION_XML).get(String.class);
         System.out.println(response);
     }
-    
+
     @Test
     public void POST() throws IOException {
-        
+
         WebResource service = getWebResource();
 
         Person person = new Person(4L, "Rajesh", "Nanjunandan");
@@ -66,7 +71,7 @@ public class PersonResourceTest {
                 post(ClientResponse.class, person);
         // Return code should be 201 == created resource
         System.out.println(response.getStatus());
-        System.out.println(PersonResourceClient.getInputStreamAsString(
+        System.out.println(PersonResourceTest.getInputStreamAsString(
                 response.getEntityInputStream()));
         // Get JSON for application
         System.out.println(service.path("person").
@@ -77,10 +82,10 @@ public class PersonResourceTest {
                 path(person.getPersonId().toString()).
                 accept(MediaType.APPLICATION_XML).get(String.class));
     }
-    
+
     @Test
     public void PUT() throws IOException, IOException, IOException {
-        
+
         WebResource service = getWebResource();
 
         Person person = new Person(4L, "Rajesh", "Nanjunandan");
@@ -90,7 +95,7 @@ public class PersonResourceTest {
                 put(ClientResponse.class, person);
         // Return code should be 201 == created resource
         System.out.println(response.getStatus());
-        System.out.println(PersonResourceClient.getInputStreamAsString(
+        System.out.println(PersonResourceTest.getInputStreamAsString(
                 response.getEntityInputStream()));
         // Get JSON for application
         System.out.println(service.path("person").
@@ -101,10 +106,10 @@ public class PersonResourceTest {
                 path(person.getPersonId().toString()).
                 accept(MediaType.APPLICATION_XML).get(String.class));
     }
-    
+
     @Test
     public void delete() throws IOException {
-        
+
         WebResource service = getWebResource();
 
         Person person = new Person(1L, "Sumved", "Shami");
@@ -113,14 +118,14 @@ public class PersonResourceTest {
                 accept(MediaType.APPLICATION_JSON).
                 delete(ClientResponse.class);
         System.out.println("URL: " + service.getURI().toString());
-        // Return code should be 201 == created resource
+// Return code should be 201 == created resource
         System.out.println(response.getStatus());
-        System.out.println(PersonResourceClient.getInputStreamAsString(
+        System.out.println(PersonResourceTest.getInputStreamAsString(
                 response.getEntityInputStream()));
     }
-    
+
     private WebResource getWebResource() {
-        
+
         ClientConfig config = new DefaultClientConfig();
         Client client = Client.create(config);
 
@@ -128,24 +133,41 @@ public class PersonResourceTest {
         OAuthParameters params = new OAuthParameters();
         params.setSignatureMethod(PLAINTEXT.NAME);
         params.setConsumerKey("key");
-//        params.setToken("accesskey");
         params.setVersion("1.1");
 
 // OAuth secrets to access resource
         OAuthSecrets secrets = new OAuthSecrets();
         secrets.setConsumerSecret("secret");
-//        secrets.setTokenSecret("accesssecret");
 
 // if parameters and secrets remain static, filter can be added to each web resource
         OAuthClientFilter filter = new OAuthClientFilter(client.getProviders(), params, secrets);
 
         WebResource service = client.resource(getBaseURI());
         service.addFilter(filter);
-        
+
         return service;
     }
-    
-    private URI getBaseURI() {
-        return UriBuilder.fromUri("http://localhost:8080/rest-poc").build();
+
+    private static URI getBaseURI() {
+        return UriBuilder.fromUri(BASE_URI).build();
+    }
+
+    private static String getInputStreamAsString(InputStream is) {
+
+        //read it with BufferedReader
+        BufferedReader br = new BufferedReader(new InputStreamReader(is));
+        StringBuilder sb = new StringBuilder();
+        String line;
+
+        try {
+            while ((line = br.readLine()) != null) {
+                sb.append(line);
+            }
+            br.close();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+
+        return sb.toString();
     }
 }
