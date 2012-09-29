@@ -21,6 +21,7 @@ import java.io.InputStreamReader;
 import java.net.URI;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
+import org.apache.log4j.Logger;
 import org.junit.*;
 
 /**
@@ -30,6 +31,8 @@ import org.junit.*;
 public class PersonResourceTest {
     
     private static String BASE_URI = "http://localhost:8084/rest";
+    private static final Logger CLASS_LOGGER =
+            Logger.getLogger(PersonResourceTest.class);
 
     public PersonResourceTest() {
     }
@@ -57,7 +60,7 @@ public class PersonResourceTest {
 
         String response = service.path("person/1").
                 accept(MediaType.APPLICATION_XML).get(String.class);
-        System.out.println(response);
+        CLASS_LOGGER.info(response);
     }
 
     @Test
@@ -70,15 +73,15 @@ public class PersonResourceTest {
                 accept(MediaType.APPLICATION_XML).
                 post(ClientResponse.class, person);
         // Return code should be 201 == created resource
-        System.out.println(response.getStatus());
-        System.out.println(PersonResourceTest.getInputStreamAsString(
+        CLASS_LOGGER.info(response.getStatus());
+        CLASS_LOGGER.info(PersonResourceTest.getInputStreamAsString(
                 response.getEntityInputStream()));
         // Get JSON for application
-        System.out.println(service.path("person").
+        CLASS_LOGGER.info(service.path("person").
                 path(person.getPersonId().toString()).
                 accept(MediaType.APPLICATION_JSON).get(String.class));
         // Get XML for application
-        System.out.println(service.path("person").
+        CLASS_LOGGER.info(service.path("person").
                 path(person.getPersonId().toString()).
                 accept(MediaType.APPLICATION_XML).get(String.class));
     }
@@ -94,15 +97,15 @@ public class PersonResourceTest {
                 accept(MediaType.APPLICATION_XML).
                 put(ClientResponse.class, person);
         // Return code should be 201 == created resource
-        System.out.println(response.getStatus());
-        System.out.println(PersonResourceTest.getInputStreamAsString(
+        CLASS_LOGGER.info(response.getStatus());
+        CLASS_LOGGER.info(PersonResourceTest.getInputStreamAsString(
                 response.getEntityInputStream()));
         // Get JSON for application
-        System.out.println(service.path("person").
+        CLASS_LOGGER.info(service.path("person").
                 path(person.getPersonId().toString()).
                 accept(MediaType.APPLICATION_JSON).get(String.class));
         // Get XML for application
-        System.out.println(service.path("person").
+        CLASS_LOGGER.info(service.path("person").
                 path(person.getPersonId().toString()).
                 accept(MediaType.APPLICATION_XML).get(String.class));
     }
@@ -117,10 +120,10 @@ public class PersonResourceTest {
                 path(person.getPersonId().toString()).
                 accept(MediaType.APPLICATION_JSON).
                 delete(ClientResponse.class);
-        System.out.println("URL: " + service.getURI().toString());
+        CLASS_LOGGER.info("URL: " + service.getURI().toString());
 // Return code should be 201 == created resource
-        System.out.println(response.getStatus());
-        System.out.println(PersonResourceTest.getInputStreamAsString(
+        CLASS_LOGGER.info(response.getStatus());
+        CLASS_LOGGER.info(PersonResourceTest.getInputStreamAsString(
                 response.getEntityInputStream()));
     }
 
@@ -154,7 +157,7 @@ public class PersonResourceTest {
 
     private static String getInputStreamAsString(InputStream is) {
 
-        //read it with BufferedReader
+//Read it with BufferedReader
         BufferedReader br = new BufferedReader(new InputStreamReader(is));
         StringBuilder sb = new StringBuilder();
         String line;
@@ -165,7 +168,8 @@ public class PersonResourceTest {
             }
             br.close();
         } catch (IOException ex) {
-            ex.printStackTrace();
+            CLASS_LOGGER.error("IOException occured while "
+                    + "reading response stream.", ex);
         }
 
         return sb.toString();
